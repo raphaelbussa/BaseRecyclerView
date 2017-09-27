@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="HardcodedText">
+
+    <item
+        android:id="@+id/remove"
+        android:title="Remove row pos 4" />
+
+    <item
+        android:id="@+id/add_pos"
+        android:title="Add row pos 4" />
+
+    <item
+        android:id="@+id/add"
+        android:title="Add row" />
+
+    <item
+        android:id="@+id/add_4"
+        android:title="Add 4 row" />
+
+    <item
+        android:id="@+id/add_4_pos"
+        android:title="Add 4 row pos 4" />
+
+    <item
+        android:id="@+id/clear"
+        android:title="Clear" />
+
+</menu>
