@@ -198,11 +198,16 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         } else {
             int itemCount = data.size();
             if (position < headerViews.size() + itemCount) {
-                return super.getItemViewType(position - headerViews.size());
+                int realPosition = position - headerViews.size();
+                return getItemViewType(data.get(realPosition), realPosition);
             } else {
                 return FOOTERS_START + position - headerViews.size() - itemCount;
             }
         }
+    }
+
+    public int getItemViewType(D item, int position) {
+        return 0;
     }
 
 /*
