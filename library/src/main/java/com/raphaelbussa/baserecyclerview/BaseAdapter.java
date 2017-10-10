@@ -120,6 +120,10 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         clear(true);
     }
 
+    public List<D> getData() {
+        return data;
+    }
+
     @Override
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType < HEADERS_START + headerViews.size())

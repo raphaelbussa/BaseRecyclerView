@@ -32,7 +32,7 @@ buildscript {
                 buildTools: "26.0.1",
                 minSdk    : 14,
                 targetSdk : 26,
-                version   : "0.0.2",
+                version   : "0.0.3",
                 supportLib: "26.1.0"
         ]
     }
