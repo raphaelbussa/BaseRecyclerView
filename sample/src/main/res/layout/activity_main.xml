@@ -11,7 +11,8 @@
         android:layout_height="match_parent"
 
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="16dp"
         app:brw_layout_manager="grid"
         app:brw_orientation="vertical"
         app:brw_reverse_layout="false"

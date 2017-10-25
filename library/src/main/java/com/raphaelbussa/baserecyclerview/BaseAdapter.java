@@ -27,6 +27,8 @@ import java.util.List;
 
 public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerView.Adapter<BaseViewHolder> {
 
+    private static final String TAG = BaseAdapter.class.getName();
+
     private static final int HEADERS_START = Integer.MIN_VALUE;
     private static final int FOOTERS_START = Integer.MIN_VALUE + 10;
 
@@ -41,9 +43,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
     private BaseAdapter.OnLongClickListener<D> onLongClickListener;
     private BaseAdapter.OnFocusChangeListener<D> onFocusChangeListener;
 
-/*
     private SparseArrayCompat<BaseAction.Bean> actions;
-*/
 
     public BaseAdapter() {
         this(null, -1);
@@ -55,9 +55,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         this.layout = layout;
         this.headerViews = new ArrayList<>();
         this.footerViews = new ArrayList<>();
-/*
         this.actions = new SparseArrayCompat<>();
-*/
     }
 
     public void addHeader(ViewGroup parent, @LayoutRes int header) {
@@ -196,6 +194,12 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
     }
 
     @Override
+    public void onViewRecycled(BaseViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.onViewRecycled();
+    }
+
+    @Override
     public int getItemViewType(int position) {
         if (position < headerViews.size()) {
             return HEADERS_START + position;
@@ -214,12 +218,9 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         return 0;
     }
 
-/*
-    public void addAction(@DrawableRes int icon, @ColorInt int color, @BaseAction.Direction int direction) {
-        actions.put(direction, new BaseAction.Bean(direction, icon, color));
+    public void addAction(@DrawableRes int icon, @ColorInt int color, @BaseAction.Direction int swipeDirection) {
+        actions.put(swipeDirection, new BaseAction.Bean(swipeDirection, icon, color));
     }
-*/
-
 
     @Override
     public int getItemCount() {
@@ -250,15 +251,15 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         void onFocusChange(View view, boolean hasFocus, D item, int position);
     }
 
-    /*@Override
+    @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         if (actions.size() != 0) {
             addActions(recyclerView);
         }
-    }*/
+    }
 
-    /*private void addActions(RecyclerView recyclerView) {
+    private void addActions(RecyclerView recyclerView) {
         int swipe = 0;
         for (int i = 0; i < actions.size(); i++) {
             swipe += actions.keyAt(i);
@@ -285,40 +286,40 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
             public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                     if (dX > 0) {
-                        Log.i(TAG, "onChildDraw: LEFT");
-                        createAction(c, actions.get(ItemTouchHelper.LEFT), viewHolder.itemView, dX);
+                        Log.i(TAG, "onChildDraw: RIGHT dX " + dX);
+                        createAction(c, actions.get(ItemTouchHelper.RIGHT), viewHolder.itemView, dX + recyclerView.getPaddingRight());
                     } else if (dX < 0) {
-                        Log.i(TAG, "onChildDraw: RIGHT");
-                        createAction(c, actions.get(ItemTouchHelper.RIGHT), viewHolder.itemView, dX);
+                        Log.i(TAG, "onChildDraw: LEFT dX " + dX);
+                        createAction(c, actions.get(ItemTouchHelper.LEFT), viewHolder.itemView, dX - recyclerView.getPaddingRight());
                     }
-                    *//*if (dY > 0) {
+                    /*if (dY > 0) {
                         //down
                         createAction(c, actions.get(ItemTouchHelper.DOWN), viewHolder.itemView, dY);
                     } else {
                         //up
                         createAction(c, actions.get(ItemTouchHelper.UP), viewHolder.itemView, dY);
-                    }*//*
+                    }*/
                 }
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-    }*/
+    }
 
 
-    /*private void createAction(Canvas canvas, BaseAction.Bean bean, View itemView, float delta) {
+    private void createAction(Canvas canvas, BaseAction.Bean bean, View itemView, float delta) {
         if (bean == null) return;
         RectF rectF = null;
         RectF background = null;
         float size;
         switch (bean.getDirection()) {
-            case ItemTouchHelper.LEFT:
+            case ItemTouchHelper.RIGHT:
                 size = ((float) itemView.getBottom() - (float) itemView.getTop()) / 3;
                 rectF = new RectF((float) itemView.getLeft() + size, (float) itemView.getTop() + size, (float) itemView.getLeft() + 2 * size, (float) itemView.getBottom() - size);
                 background = new RectF((float) itemView.getLeft(), (float) itemView.getTop(), delta, (float) itemView.getBottom());
                 break;
-            case ItemTouchHelper.RIGHT:
+            case ItemTouchHelper.LEFT:
                 size = ((float) itemView.getBottom() - (float) itemView.getTop()) / 3;
                 rectF = new RectF((float) itemView.getRight() - 2 * size, (float) itemView.getTop() + size, (float) itemView.getRight() - size, (float) itemView.getBottom() - size);
                 background = new RectF((float) itemView.getRight() + delta, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
@@ -339,6 +340,6 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         if (bean.getIcon() == 0) return;
         Bitmap bitmap = BitmapFactory.decodeResource(itemView.getResources(), bean.getIcon());
         canvas.drawBitmap(bitmap, null, rectF, paint);
-    }*/
+    }
 
 }

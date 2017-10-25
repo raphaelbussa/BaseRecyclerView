@@ -28,10 +28,8 @@ public class MainActivity extends AppCompatActivity {
 
         mainAdapter = new BaseAdapter<>(MainViewHolder.class, R.layout.row_test);
 
-/*
         mainAdapter.addAction(R.drawable.ic_delete_white, ContextCompat.getColor(this, R.color.colorAccent), ItemTouchHelper.LEFT);
         mainAdapter.addAction(R.drawable.ic_edit_white, ContextCompat.getColor(this, R.color.colorPrimaryDark), ItemTouchHelper.RIGHT);
-*/
 
         baseRecyclerView.setAdapter(mainAdapter);
         for (int i = 0; i < 2; i++) {
