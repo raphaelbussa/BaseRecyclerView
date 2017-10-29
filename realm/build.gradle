@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017 Raphaël Bussa
+ * Copyright (c) 2016 Raphaël Bussa
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,22 +22,23 @@
  * SOFTWARE.
  */
 
-apply plugin: 'com.android.application'
-apply plugin: 'realm-android'
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
-
     compileSdkVersion var.compileSdk
     buildToolsVersion var.buildTools
 
     defaultConfig {
-        applicationId "com.raphaelbussa.baserecyclerview.sample"
         minSdkVersion var.minSdk
         targetSdkVersion var.targetSdk
         versionCode 1
         versionName "${var.version}"
     }
     buildTypes {
+        all {
+            resValue "string", "version", "${var.version}"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -50,7 +51,15 @@ android {
 
 dependencies {
     compile project(':library')
-    compile project(':realm')
-    compile "com.android.support:appcompat-v7:${var.supportLib}"
-    compile "com.android.support:design:${var.supportLib}"
+    compile "com.android.support:recyclerview-v7:${var.supportLib}"
+    provided "io.realm:realm-android-library:${var.realmVersion}"
+}
+
+publish {
+    userOrg = 'raphaelbussa'
+    groupId = 'rebus'
+    artifactId = 'base-recyclerview-realm'
+    publishVersion = "${var.version}"
+    desc = 'Create sample recycler view with realm'
+    website = 'https://github.com/rebus007/BaseRecyclerView'
 }

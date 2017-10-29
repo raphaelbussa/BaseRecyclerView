@@ -69,4 +69,14 @@ public class BaseRecyclerView extends RecyclerView {
         setLayoutManager(baseLayoutManager);
     }
 
+    public void setSpanCount(int spanCount) {
+        this.spanCount = spanCount;
+        if (baseLayoutManager instanceof GridLayoutManager) {
+            ((GridLayoutManager) baseLayoutManager).setSpanCount(this.spanCount);
+        }
+        if (baseLayoutManager instanceof StaggeredGridLayoutManager) {
+            ((StaggeredGridLayoutManager) baseLayoutManager).setSpanCount(this.spanCount);
+        }
+    }
+
 }

@@ -77,7 +77,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
     }
 
     public void addAll(Collection<D> items) {
-        int pos = data.size() + headerViews.size();
+        int pos = getDataSize() + headerViews.size();
         this.data.addAll(items);
         this.notifyItemRangeInserted(pos, items.size());
     }
@@ -89,7 +89,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
 
     public void add(D item) {
         this.data.add(item);
-        this.notifyItemInserted(data.size() + headerViews.size() - 1);
+        this.notifyItemInserted(getDataSize() + headerViews.size() - 1);
     }
 
     public void add(D item, int index) {
@@ -109,7 +109,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
     }
 
     public void clear(boolean notify) {
-        int size = data.size();
+        int size = getDataSize();
         this.data.clear();
         if (notify) this.notifyItemRangeRemoved(headerViews.size(), size);
     }
@@ -156,16 +156,15 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
 
     @Override
     public void onBindViewHolder(final BaseViewHolder holder, int pos) {
-        if (pos >= headerViews.size() && pos < headerViews.size() + data.size()) {
+        if (pos >= headerViews.size() && pos < headerViews.size() + getDataSize()) {
             int position = pos - headerViews.size();
-            holder.itemView.setTag(R.id.id_adapter_object, data.get(position));
             if (onClickListener != null) {
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @SuppressWarnings("unchecked")
                     @Override
                     public void onClick(View view) {
-                        D data = (D) view.getTag(R.id.id_adapter_object);
-                        onClickListener.onClick(view, data, holder.getAdapterPosition() - headerViews.size());
+                        int realPosition = holder.getAdapterPosition() - headerViews.size();
+                        onClickListener.onClick(view, getItem(realPosition), realPosition);
                     }
                 });
             }
@@ -174,8 +173,8 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
                     @SuppressWarnings("unchecked")
                     @Override
                     public boolean onLongClick(View view) {
-                        D data = (D) view.getTag(R.id.id_adapter_object);
-                        return onLongClickListener.onLongClick(view, data, holder.getAdapterPosition() - headerViews.size());
+                        int realPosition = holder.getAdapterPosition() - headerViews.size();
+                        return onLongClickListener.onLongClick(view, getItem(realPosition), realPosition);
                     }
                 });
             }
@@ -184,12 +183,12 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
                     @SuppressWarnings("unchecked")
                     @Override
                     public void onFocusChange(View view, boolean hasFocus) {
-                        D data = (D) view.getTag(R.id.id_adapter_object);
-                        onFocusChangeListener.onFocusChange(view, hasFocus, data, holder.getAdapterPosition() - headerViews.size());
+                        int realPosition = holder.getAdapterPosition() - headerViews.size();
+                        onFocusChangeListener.onFocusChange(view, hasFocus, getItem(realPosition), realPosition);
                     }
                 });
             }
-            onBindViewHolder(holder, data.get(position), position);
+            onBindViewHolder(holder, getItem(position), position);
         }
     }
 
@@ -204,10 +203,10 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         if (position < headerViews.size()) {
             return HEADERS_START + position;
         } else {
-            int itemCount = data.size();
+            int itemCount = getDataSize();
             if (position < headerViews.size() + itemCount) {
                 int realPosition = position - headerViews.size();
-                return getItemViewType(data.get(realPosition), realPosition);
+                return getItemViewType(getItem(realPosition), realPosition);
             } else {
                 return FOOTERS_START + position - headerViews.size() - itemCount;
             }
@@ -224,7 +223,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
 
     @Override
     public int getItemCount() {
-        return headerViews.size() + data.size() + footerViews.size();
+        return headerViews.size() + getDataSize() + footerViews.size();
     }
 
     public void setOnClickListener(OnClickListener<D> onClickListener) {
@@ -237,18 +236,6 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
 
     public void setOnFocusChangeListener(OnFocusChangeListener<D> onFocusChangeListener) {
         this.onFocusChangeListener = onFocusChangeListener;
-    }
-
-    public interface OnLongClickListener<D> {
-        boolean onLongClick(View view, D item, int position);
-    }
-
-    public interface OnClickListener<D> {
-        void onClick(View view, D item, int position);
-    }
-
-    public interface OnFocusChangeListener<D> {
-        void onFocusChange(View view, boolean hasFocus, D item, int position);
     }
 
     @Override
@@ -307,7 +294,6 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
-
     private void createAction(Canvas canvas, BaseAction.Bean bean, View itemView, float delta) {
         if (bean == null) return;
         RectF rectF = null;
@@ -340,6 +326,26 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         if (bean.getIcon() == 0) return;
         Bitmap bitmap = BitmapFactory.decodeResource(itemView.getResources(), bean.getIcon());
         canvas.drawBitmap(bitmap, null, rectF, paint);
+    }
+
+    public D getItem(int index) {
+        return data.get(index);
+    }
+
+    public int getDataSize() {
+        return data.size();
+    }
+
+    public interface OnLongClickListener<D> {
+        boolean onLongClick(View view, D item, int position);
+    }
+
+    public interface OnClickListener<D> {
+        void onClick(View view, D item, int position);
+    }
+
+    public interface OnFocusChangeListener<D> {
+        void onFocusChange(View view, boolean hasFocus, D item, int position);
     }
 
 }

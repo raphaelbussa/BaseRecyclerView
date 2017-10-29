@@ -28,12 +28,13 @@ buildscript {
 
     ext {
         var = [
-                compileSdk: 26,
-                buildTools: "26.0.1",
+                compileSdk: 27,
+                buildTools: "27.0.0",
                 minSdk    : 14,
-                targetSdk : 26,
-                version   : "0.0.4",
-                supportLib: "26.1.0"
+                targetSdk : 27,
+                version   : "0.0.7",
+                supportLib: "27.0.0",
+                realmVersion: "4.1.0"
         ]
     }
 
@@ -42,8 +43,9 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         classpath 'com.novoda:bintray-release:0.5.0'
+        classpath "io.realm:realm-gradle-plugin:${var.realmVersion}"
     }
 }
 
