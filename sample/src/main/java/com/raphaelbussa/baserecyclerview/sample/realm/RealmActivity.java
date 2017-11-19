@@ -61,7 +61,11 @@ public class RealmActivity extends AppCompatActivity {
         for (int i = 0; i < 20; i++) {
             ItemModel model = new ItemModel();
             model.setId(i);
-            model.setText("Realm row " + i);
+            String text = "test row ";
+            for (int i1 = 0; i1 < i; i1++) {
+                text += text;
+            }
+            model.setText("Realm row " + text);
             realm.copyToRealmOrUpdate(model);
         }
 

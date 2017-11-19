@@ -50,6 +50,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
     }
 
     public BaseAdapter(Class<VH> viewHolderClass, int layout) {
+        this.setHasStableIds(true);
         this.data = new ArrayList<>();
         this.viewHolderClass = viewHolderClass;
         this.layout = layout;
@@ -196,6 +197,11 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
     public void onViewRecycled(BaseViewHolder holder) {
         super.onViewRecycled(holder);
         holder.onViewRecycled();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
