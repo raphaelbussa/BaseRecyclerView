@@ -87,6 +87,10 @@ public class BaseRealmAdapter<D extends RealmObject, VH extends BaseViewHolder<D
         return new OrderedRealmCollectionChangeListener() {
             @Override
             public void onChange(@NonNull Object ds, @Nullable OrderedCollectionChangeSet changeSet) {
+                try {
+                    getRecyclerView().getRecycledViewPool().clear();
+                } catch (Exception ignored) {}
+
                 if (changeSet == null) {
                     notifyDataSetChanged();
                     return;
@@ -95,17 +99,17 @@ public class BaseRealmAdapter<D extends RealmObject, VH extends BaseViewHolder<D
                 OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
                 for (int i = deletions.length - 1; i >= 0; i--) {
                     OrderedCollectionChangeSet.Range range = deletions[i];
-                    notifyItemRangeRemoved(range.startIndex, range.length);
+                    notifyItemRangeRemoved(getHeaderViewSize() + range.startIndex, range.length);
                 }
 
                 OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
                 for (OrderedCollectionChangeSet.Range range : insertions) {
-                    notifyItemRangeInserted(range.startIndex, range.length);
+                    notifyItemRangeInserted(getHeaderViewSize() + range.startIndex, range.length);
                 }
 
                 OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
                 for (OrderedCollectionChangeSet.Range range : modifications) {
-                    notifyItemRangeChanged(range.startIndex, range.length);
+                    notifyItemRangeChanged(getHeaderViewSize() + range.startIndex, range.length);
                 }
 
             }

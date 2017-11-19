@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.raphaelbussa.baserecyclerview.BaseAdapter;
@@ -32,6 +33,9 @@ public class RealmActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        RelativeLayout root = findViewById(R.id.root);
+
+
         BaseRecyclerView baseRecyclerView = findViewById(R.id.list);
 
         Realm realm = Realm.getDefaultInstance();
@@ -53,6 +57,13 @@ public class RealmActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        mainAdapter.addHeader(root, R.layout.header_test);
+        mainAdapter.addHeader(root, R.layout.header_test);
+
+        mainAdapter.addFooter(root, R.layout.footer_test);
+        mainAdapter.addFooter(root, R.layout.footer_test);
+
 
         baseRecyclerView.setAdapter(mainAdapter);
 

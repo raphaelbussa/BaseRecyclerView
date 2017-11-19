@@ -45,6 +45,8 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
 
     private SparseArrayCompat<BaseAction.Bean> actions;
 
+    private RecyclerView recyclerView;
+
     public BaseAdapter() {
         this(null, -1);
     }
@@ -85,7 +87,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
 
     public void addAll(Collection<D> items, int index) {
         this.data.addAll(index, items);
-        this.notifyItemRangeInserted(index + +headerViews.size(), items.size());
+        this.notifyItemRangeInserted(index + headerViews.size(), items.size());
     }
 
     public void add(D item) {
@@ -246,6 +248,7 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
         super.onAttachedToRecyclerView(recyclerView);
         if (actions.size() != 0) {
             addActions(recyclerView);
@@ -342,6 +345,14 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
         return data.size();
     }
 
+    public int getHeaderViewSize() {
+        return headerViews.size();
+    }
+
+    public int getFooterViewSize() {
+        return footerViews.size();
+    }
+
     public interface OnLongClickListener<D> {
         boolean onLongClick(View view, D item, int position);
     }
@@ -353,5 +364,11 @@ public class BaseAdapter<D, VH extends BaseViewHolder<D>> extends BaseRecyclerVi
     public interface OnFocusChangeListener<D> {
         void onFocusChange(View view, boolean hasFocus, D item, int position);
     }
+
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
+
 
 }

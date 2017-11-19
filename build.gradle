@@ -29,12 +29,12 @@ buildscript {
     ext {
         var = [
                 compileSdk: 27,
-                buildTools: "27.0.0",
+                buildTools: "27.0.1",
                 minSdk    : 14,
                 targetSdk : 27,
-                version   : "0.0.9",
-                supportLib: "27.0.0",
-                realmVersion: "4.1.1"
+                version   : "0.0.10",
+                supportLib: "27.0.1",
+                realmVersion: "4.2.0"
         ]
     }
 
