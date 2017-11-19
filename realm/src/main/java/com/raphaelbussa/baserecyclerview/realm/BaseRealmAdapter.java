@@ -23,79 +23,37 @@ import io.realm.RealmResults;
 
 public class BaseRealmAdapter<D extends RealmObject, VH extends BaseViewHolder<D>> extends BaseAdapter<D, VH> {
 
+    private final boolean hasAutoUpdates;
+    private final boolean updateOnModification;
     private final OrderedRealmCollectionChangeListener listener;
     @Nullable
     private OrderedRealmCollection<D> adapterData;
 
-    public BaseRealmAdapter(@Nullable OrderedRealmCollection<D> adapterData) {
-        this(adapterData, null, -1);
+    public BaseRealmAdapter(@Nullable OrderedRealmCollection<D> data, boolean autoUpdate, boolean updateOnModification) {
+        this(null, -1, data, autoUpdate, updateOnModification);
     }
 
-    public BaseRealmAdapter(@Nullable OrderedRealmCollection<D> adapterData, Class<VH> viewHolderClass, int layout) {
+    public BaseRealmAdapter(Class<VH> viewHolderClass, int layout, @Nullable OrderedRealmCollection<D> data, boolean autoUpdate, boolean updateOnModification) {
         super(viewHolderClass, layout);
-        this.adapterData = adapterData;
-        this.listener = createListener();
+        if (data != null && !data.isManaged()) {
+            throw new IllegalStateException("Only use this adapter with managed RealmCollection, for un-managed lists you can just use the BaseRecyclerViewAdapter");
+        }
+        this.adapterData = data;
+        this.hasAutoUpdates = autoUpdate;
+        this.listener = hasAutoUpdates ? createListener() : null;
+        this.updateOnModification = updateOnModification;
     }
 
-    @Override
-    public void addAll(Collection<D> items) {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @Override
-    public void addAll(Collection<D> items, int index) {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @Override
-    public void add(D item) {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @Override
-    public void add(D item, int index) {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @Override
-    public void remove(D item) {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @Override
-    public void remove(int pos) {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @Override
-    public void clear(boolean notify) {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @Override
-    public void clear() {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @Override
-    public List<D> getData() {
-        throw new RuntimeException("method not available in BaseRealmAdapter");
-    }
-
-    @SuppressWarnings("unchecked")
-    private OrderedRealmCollectionChangeListener<RealmResults<D>> createListener() {
+    private OrderedRealmCollectionChangeListener createListener() {
         return new OrderedRealmCollectionChangeListener() {
             @Override
-            public void onChange(@NonNull Object ds, @Nullable OrderedCollectionChangeSet changeSet) {
-                try {
-                    getRecyclerView().getRecycledViewPool().clear();
-                } catch (Exception ignored) {}
-
+            public void onChange(@NonNull Object collection, OrderedCollectionChangeSet changeSet) {
+                // null Changes means the async query returns the first time.
                 if (changeSet == null) {
                     notifyDataSetChanged();
                     return;
                 }
-
+                // For deletions, the adapter has to be notified in reverse order.
                 OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
                 for (int i = deletions.length - 1; i >= 0; i--) {
                     OrderedCollectionChangeSet.Range range = deletions[i];
@@ -107,77 +65,95 @@ public class BaseRealmAdapter<D extends RealmObject, VH extends BaseViewHolder<D
                     notifyItemRangeInserted(getHeaderViewSize() + range.startIndex, range.length);
                 }
 
+                if (!updateOnModification) {
+                    return;
+                }
+
                 OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
                 for (OrderedCollectionChangeSet.Range range : modifications) {
                     notifyItemRangeChanged(getHeaderViewSize() + range.startIndex, range.length);
                 }
-
             }
         };
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void onBindViewHolder(BaseViewHolder holder, D item, int position) {
-        holder.onBindViewHolder(getItem(position));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public D getItem(int index) {
-        return isDataValid() ? adapterData.get(index) : null;
-    }
-
-    @SuppressWarnings("ConstantConditions")
     @Override
     public void onAttachedToRecyclerView(final RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        if (isDataValid()) {
+        if (hasAutoUpdates && isDataValid()) {
+            //noinspection ConstantConditions
             addListener(adapterData);
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public void onDetachedFromRecyclerView(final RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-        if (isDataValid()) {
+        if (hasAutoUpdates && isDataValid()) {
+            //noinspection ConstantConditions
             removeListener(adapterData);
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+    public int getDataSize() {
+        //noinspection ConstantConditions
+        return isDataValid() ? adapterData.size() : 0;
+    }
+
+    @Override
+    public D getItem(int index) {
+        //noinspection ConstantConditions
+        return isDataValid() ? adapterData.get(index) : null;
+    }
+
+    @Nullable
+    public OrderedRealmCollection<D> getData() {
+        return adapterData;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void updateData(@Nullable OrderedRealmCollection<D> data) {
+        if (hasAutoUpdates) {
+            if (isDataValid()) {
+                //noinspection ConstantConditions
+                removeListener(adapterData);
+            }
+            if (data != null) {
+                addListener(data);
+            }
+        }
+
+        this.adapterData = data;
+        notifyDataSetChanged();
+    }
+
     private void addListener(@NonNull OrderedRealmCollection<D> data) {
-        if (listener == null) return;
         if (data instanceof RealmResults) {
             RealmResults<D> results = (RealmResults<D>) data;
+            //noinspection unchecked
             results.addChangeListener(listener);
         } else if (data instanceof RealmList) {
             RealmList<D> list = (RealmList<D>) data;
+            //noinspection unchecked
             list.addChangeListener(listener);
         } else {
             throw new IllegalArgumentException("RealmCollection not supported: " + data.getClass());
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void removeListener(@NonNull OrderedRealmCollection<D> data) {
-        if (listener == null) return;
         if (data instanceof RealmResults) {
             RealmResults<D> results = (RealmResults<D>) data;
+            //noinspection unchecked
             results.removeChangeListener(listener);
         } else if (data instanceof RealmList) {
             RealmList<D> list = (RealmList<D>) data;
+            //noinspection unchecked
             list.removeChangeListener(listener);
         } else {
             throw new IllegalArgumentException("RealmCollection not supported: " + data.getClass());
         }
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public int getDataSize() {
-        return isDataValid() ? adapterData.size() : 0;
     }
 
     private boolean isDataValid() {

@@ -40,7 +40,11 @@ public class RealmActivity extends AppCompatActivity {
 
         Realm realm = Realm.getDefaultInstance();
         RealmResults<ItemModel> query = realm.where(ItemModel.class).findAllSorted("id");
-        mainAdapter = new BaseRealmAdapter<>(query, RealmViewHolder.class, R.layout.row_realm_test);
+        mainAdapter = new BaseRealmAdapter<>(RealmViewHolder.class,
+                R.layout.row_realm_test,
+                query,
+                true,
+                true);
         mainAdapter.setOnClickListener(new BaseAdapter.OnClickListener<ItemModel>() {
             @Override
             public void onClick(View view, ItemModel item, int position) {

@@ -32,7 +32,7 @@ buildscript {
                 buildTools: "27.0.1",
                 minSdk    : 14,
                 targetSdk : 27,
-                version   : "0.0.10",
+                version   : "0.0.11",
                 supportLib: "27.0.1",
                 realmVersion: "4.2.0"
         ]
